@@ -7,22 +7,29 @@ import (
 	"io"
 	"bufio"
 	"flag"
+	"encoding/binary"
 )
 
 
 const (
-	defaultName	= "nil.bfs"	// Default disk file name
-	prompt		= "> "		// Prefix for input prompt
+	defaultName	= "nil.bfs"				// Default disk file name
+	prompt		= "> "					// Prefix for input prompt
+	maxData		= 256					// Max bytes in a file
+	maxKids		= 256					// Max children of a directory
 )
 
 var (
-	chatty		bool		// Verbose debug output
+	chatty		bool					// Verbose debug output
+	root		File					// Top level file of the file system
+	user		string					// User of the file system
+	endian		= binary.LittleEndian	// Disk binary endian-ness
 )
 
 
-// Basic disk filesystem
+// Basic disk file system
 func main() {
 	flag.BoolVar(&chatty, "D", false, "Verbose debug output")
+	flag.StringVar(&user, "u", "none", "File system user")
 	flag.Parse()
 
 	in := bufio.NewReader(os.Stdin)
@@ -37,7 +44,7 @@ func main() {
 				break repl
 			}
 
-			fatal("err: could not read input - ", err)
+			fatal("err: could not read input -", err)
 		}
 
 		fields := strings.Fields(string(line))
@@ -59,6 +66,7 @@ func main() {
 			}
 
 		case "ls":
+			// TODO
 
 
 		case "rm":
@@ -67,11 +75,43 @@ func main() {
 				continue repl
 			}
 
-		case "save":
+			// TODO
 
+		case "save":
+			fname := defaultName
+			if nfields > 1 {
+				fname = fields[1]
+			}
+
+			f, err := os.OpenFile(fname, os.O_RDWR|os.O_CREATE, 0640)
+			if err != nil {
+				fatal("err: could not open file for write -", err)
+			}
+			defer f.Close()
+
+			// TODO - write out differently, this is broken
+			err = binary.Write(f, endian, root)
+			if err != nil {
+				fatal("err: could not write file -", err)
+			}
 
 		case "load":
+			fname := defaultName
+			if nfields > 1 {
+				fname = fields[1]
+			}
 
+			f, err := os.Open(fname)
+			if err != nil {
+				fatal("err: could not open file for read -", err)
+			}
+			defer f.Close()
+
+			// TODO - rewrite to match `save` format
+			err = binary.Read(f, endian, &root)
+			if err != nil {
+				fatal("err: could not read file -", err)
+			}
 
 		case "quit":
 			fallthrough
