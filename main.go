@@ -77,6 +77,14 @@ func main() {
 
 			// TODO
 
+		case "emit":
+			if nfields < 2 {
+				fmt.Println("fail: emit requires a 'name' argument")
+				continue repl
+			}
+
+			// TODO
+
 		case "save":
 			fname := defaultName
 			if nfields > 1 {
@@ -132,11 +140,12 @@ func fatal(s ...interface{}) {
 
 
 var helpStr string = `Valid commands:
-	help		­ print this description
-	exit		­ terminate prompt loop
-	cd path		­ change current directory to 'path'
-	ls [path]	­ list directory contents, current by default
+	help		- print this description
+	exit		- terminate prompt loop
+	cd path		- change current directory to 'path'
+	ls [path]	- list directory contents, current by default
 	rm name		- delete a file called 'name'
-	save [name]	­ write cache to disk called 'name', 'nil.bfs' by default
+	emit name	- print the raw file data called 'name'
+	save [name]	- write cache to disk called 'name', 'nil.bfs' by default
 	load [name]	- load a disk into memory called 'name', 'nil.bfs' by default
 `
